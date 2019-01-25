@@ -1,9 +1,9 @@
 {
-	"name": "Web Sniffer",
+	"name": "NetGrok",
 	"version": "0.0.0.1",
 	"description": "View all HTTP Requests and Responses sent between the Web browser and the Web server.",
-	"short_name": "Web Sniffer",
-	"author": "5MS",
+	"short_name": "NetGrok",
+	"author": "Tyler Reece, Kyle King",
 	"homepage_url": "http://5ms.ru/sniffer/",
 	"background": {
 		"scripts": ["background.js"]
@@ -14,7 +14,7 @@
 			"19": "19.png",
 			"38": "38.png"
 		},
-		"default_title": "Start Web Sniffer"
+		"default_title": "Start Grokking!"
 	},
 	"permissions": ["tabs", "webRequest", "webRequestBlocking", "*://*/*"],
 	"manifest_version": 2
