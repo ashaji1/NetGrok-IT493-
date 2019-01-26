@@ -1,10 +1,9 @@
 {
 	"name": "NetGrok",
 	"version": "0.0.0.1",
-	"description": "View all HTTP Requests and Responses sent between the Web browser and the Web server.",
+	"description": "Visualize Your Network!",
 	"short_name": "NetGrok",
 	"author": "Tyler Reece, Kyle King",
-	"homepage_url": "http://5ms.ru/sniffer/",
 	"background": {
 		"scripts": ["background.js"]
 	},

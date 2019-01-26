@@ -6,6 +6,8 @@ main.js
 
 */
 
+// ****************************************************** //
+
 
 /* FUNCTIONS */
 
@@ -33,10 +35,28 @@ function isPrimary(details) {
 	return jsonString.includes("main_frame");
 }
 
-function isUnique(details) {
-	return true;
-	//return !nodes.includes(details);
+
+function sizeOne (item) {
+	return item.label == url;
 }
+
+/*
+function favicon(url) {
+	favUrl = "https://www.google.com/s2/favicons?domain=" + url;
+	return favUrl;
+}
+*/
+
+
+
+
+
+
+// ******************************************************************** //
+
+
+
+
 
 /* Network Visualization */
 // create an array with nodes
@@ -59,8 +79,18 @@ function isUnique(details) {
     nodes: nodes
   };
   var options = {
+  	randomSeed:2,
   };
   var network = new vis.Network(container, data, options);
+
+
+  /* Empty Network */
+  if(!nodes.length) {
+  	nodes.add({id: 0, label: "Browse around to start Grokking!"});
+  };
+
+
+  // ********************************************************************** //
 
 
 /* Event Handler */
@@ -69,21 +99,57 @@ chrome.runtime.onConnect.addListener(function(port) {
 
 	port.onMessage.addListener(function(Message) {
 
+		var deets = Message.Details;
+		
+		// remove intro message upon browsing start
+		if(nodes.get(0)) {
+			nodes.remove(0);
+		};
+
 		// Testing purposes only //
 		//console.log(Message.Details);
 		//console.log(parse_url(Message.Details.url));
 		
-		if(isPrimary(Message.Details)) { // ensures primary connections only
-			if(Message.Details.ip) { // ensures unique nodes only
-				console.log(Message.Details)
-				nodes.add({label: parse_url(Message.Details.url).hostname});
+		if(isPrimary(deets)) { // ensures primary connections only
+			if(deets.ip) { // ensures unique nodes only
+				
+
+				// debug
+				console.log(deets);
+
+				// get url
+				url = parse_url(deets.url).hostname;
+				var time = new Date(Message.Details.timeStamp).toTimeString().slice(0, 8);
+				console.log(url);
+				// if request is unique
+				if(nodes.get({filter: sizeOne}).length == 0) { 
+					nodes.add({label: url, fromCache: deets.fromCache, ip: deets.ip, time: time, type: deets.type, image: 'https://' + url + '/favicon.ico', shape:'image'});
+				};
+
+				
+
+				// if duplicate request
+				//else {
+
+				//}
+
 			};
 		};
+
+		// resize on each request to fit growth of network
 		network.fit();
 
 	});
 });
 
+
+/* Interactive Events */
+network.on('click', function(properties) {
+	var ids = properties.nodes;
+	var clickedNodes = nodes.get(ids);
+	document.getElementById('info').innerHTML = 'Info: ' + JSON.stringify(clickedNodes);
+	console.log('clicked nodes: ', clickedNodes)
+});
 
 
 
