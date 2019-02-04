@@ -15,6 +15,6 @@
 		},
 		"default_title": "Start Grokking!"
 	},
-	"permissions": ["tabs", "webRequest", "webRequestBlocking", "*://*/*"],
+	"permissions": ["storage", "tabs", "webRequest", "webRequestBlocking", "*://*/*"],
 	"manifest_version": 2
 }

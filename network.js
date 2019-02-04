@@ -40,6 +40,10 @@ function sizeOne (item) {
 	return item.label == url;
 }
 
+function removehttp(url) {
+	return url.split("//")[1];
+}
+
 
 // ******************************************************************** //
 
@@ -47,6 +51,7 @@ function sizeOne (item) {
 /* Network Visualization */
 // create an array with nodes
   var nodes = new vis.DataSet();
+  var edges = new vis.DataSet();
 
 /*
   // create an array with edges
@@ -62,13 +67,23 @@ function sizeOne (item) {
   // create a network
   var container = document.getElementById('mynetwork');
   var data = {
-    nodes: nodes
+    nodes: nodes,
+    edges: edges
   };
+  
   var options = {
   	nodes: {
   		brokenImage: "undefined.png",
+  		font: {
+  			multi: 'html',
+  		},
+  		shape: 'box'
   	},
-  	randomSeed:2,
+  	edges: {
+  		color: {
+  			color: 'skyblue',
+  		}
+  	}
   };
   var network = new vis.Network(container, data, options);
 
@@ -84,12 +99,20 @@ function sizeOne (item) {
 
 /* Event Handler */
 
+var idCount = 1;
+var secondaryConnections = {}; // 
+var idToPrimary = {};
+
 chrome.runtime.onConnect.addListener(function(port) {
 
 	port.onMessage.addListener(function(Message) {
 
 		var deets = Message.Details;
-		
+		//console.log(deets);
+		//if(isPrimary(deets)) {
+		//	deets = "PRIMARY: " + deets;
+		//};
+		//console.log(deets);
 		
 
 		// Testing purposes only //
@@ -104,28 +127,91 @@ chrome.runtime.onConnect.addListener(function(port) {
 					nodes.remove(0);
 				};
 				
+				//console.log(deets);
 
 				// debug
-				console.log(deets);
+				//console.log(deets);
 
 				// get url
 				url = parse_url(deets.url).hostname;
 				var time = new Date(Message.Details.timeStamp).toTimeString().slice(0, 8);
-				console.log(url);
+				//console.log(url);
 				// if request is unique
 				if(nodes.get({filter: sizeOne}).length == 0) { 
-					nodes.add({label: url, fromCache: deets.fromCache, ip: deets.ip, time: time, type: deets.type, image: 'https://' + url + '/favicon.ico', shape:'image'});
+					nodes.add({id: idCount, label: "<b>" + url + "</b>", group: idCount, fromCache: deets.fromCache, ip: deets.ip, time: time, type: deets.type, image: 'https://' + url + '/favicon.ico', shape:'image'});
+					idToPrimary[url] = idCount;
+					idCount += 1;
+					nodes.add({id: idCount, label: "JavaScript\n<b>0</b>", group: idCount, number: 0}); // id + 1
+					edges.add({to: idCount, from: idCount-1});
+					idCount += 1;
+					nodes.add({id: idCount, label: "Images\n<b>0</b>", group: idCount, number: 0}); // id + 2
+					edges.add({to: idCount, from: idCount-2});
+					idCount += 1;
+					nodes.add({id: idCount, label: "XmlHttpRequests\n<b>0</b>", group: idCount, number: 0}); // id + 3
+					edges.add({to: idCount, from: idCount-3});
+					idCount += 1;
+					nodes.add({id: idCount, label: "Fonts\n<b>0</b>", group: idCount, number: 0}); // id + 4
+					edges.add({to: idCount, from: idCount-4});
+					idCount += 1;
+					nodes.add({id: idCount, label: "Stylesheets\n<b>0</b>", group: idCount, number:0}); // id + 5
+					edges.add({to: idCount, from: idCount-5});
+					idCount += 1;
+					nodes.add({id: idCount, label: "Media\n<b>0</b>", group: idCount, number:0}); // id + 6
+					edges.add({to: idCount, from: idCount-6});
+					idCount += 1;
+					nodes.add({id: idCount, label: "Other\n<b>0</b>", group: idCount, number: 0}); // id + 7
+					edges.add({to: idCount, from: idCount-7});
+					idCount += 1;
 					network.fit(); // resize on each addition to fit growth of network
+					var ini = url; // store in dict
+					secondaryConnections[ini] = []; // input initiator into groupDict
+					idCount += 1; // increment idCount
+					//console.log(groupDict);
+					console.log(idToPrimary);
 				};
 
 			};
+		}
+
+		else { // Secondary connection
+			var type = deets.type;
+			var ini = removehttp(deets.initiator);
+			//console.log(deets);
+			console.log(currentNumber);
+			if(ini in secondaryConnections) { // if primary connection this belongs to
+				if(type == "script") {
+					var currentNumber = nodes.get(idToPrimary[ini]+1).number;
+					console.log(currentNumber);
+					nodes.update({id: idToPrimary[ini]+1, number: currentNumber+1, label: "JavaScript\n<b>" + String(currentNumber+1) + "</b>"});
+				}
+				if(type == "image") {
+					var currentNumber = nodes.get(idToPrimary[ini]+2).number;
+					nodes.update({id: idToPrimary[ini]+2, number: currentNumber+1, label: "Images\n<b>" + String(currentNumber+1) + "</b>"});
+				}
+				if(type == "xmlhttprequest") {
+					var currentNumber = nodes.get(idToPrimary[ini]+3).number;
+					nodes.update({id: idToPrimary[ini]+3, number: currentNumber+1, label:"XmlHttpRequests\n<b>" + String(currentNumber+1) + "</b>"});
+				}
+				if(type == "font") {
+					var currentNumber = nodes.get(idToPrimary[ini]+4).number;
+					nodes.update({id: idToPrimary[ini]+4, number: currentNumber+1, label:"Fonts\n<b>" + String(currentNumber+1) + "</b>"});
+				}
+				if(type == "stylesheet") {
+					var currentNumber = nodes.get(idToPrimary[ini]+5).number;
+					nodes.update({id: idToPrimary[ini]+5, number: currentNumber+1, label: "Stylesheets\n<b>" + String(currentNumber+1) + "</b>"});
+				}
+				if(type == "media") {
+					var currentNumber = nodes.get(idToPrimary[ini]+6).number;
+					nodes.update({id: idToPrimary[ini]+6, number: currentNumber+1, label: "Media\n<b>" + String(currentNumber+1) + "</b>"});
+				}
+				if(type == "other") {
+					var currentNumber = nodes.get(idToPrimary[ini]+7).number;
+					nodes.update({id: idToPrimary[ini]+7, number: currentNumber+1, label: "Other\n<b>" + String(currentNumber+1) + "</b>"});
+				}
+				secondaryConnections[ini].push(deets.url);
+			};
+			
 		};
-
-		//else { // secondary connection
-
-		//};
-
-		
 		
 
 	});
@@ -136,6 +222,8 @@ chrome.runtime.onConnect.addListener(function(port) {
 network.on('click', function(properties) {
 	var ids = properties.nodes;
 	var clickedNodes = nodes.get(ids);
-	document.getElementById('info').innerHTML = 'Info: ' + JSON.stringify(clickedNodes);
-	console.log('clicked nodes: ', clickedNodes)
+	var primaryConnection = clickedNodes[0].label;
+	document.getElementById('info').innerHTML = 'Secondary Connections: ' + secondaryConnections[primaryConnection];
+	document.getElementById('info').innerHTML = 'Number: ' + clickedNodes[0].number;
+	//console.log('clicked nodes: ', clickedNodes)
 });
