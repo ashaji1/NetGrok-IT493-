@@ -72,16 +72,19 @@ function removehttp(url) {
   };
   
   var options = {
+  	layout: {
+  		randomSeed: 2,
+  	},
   	nodes: {
   		brokenImage: "undefined.png",
   		font: {
   			multi: 'html',
   		},
-  		shape: 'box'
+  		shape: 'box',
   	},
   	edges: {
   		color: {
-  			color: 'skyblue',
+  			color: 'blue',
   		}
   	}
   };
@@ -138,28 +141,28 @@ chrome.runtime.onConnect.addListener(function(port) {
 				//console.log(url);
 				// if request is unique
 				if(nodes.get({filter: sizeOne}).length == 0) { 
-					nodes.add({id: idCount, label: "<b>" + url + "</b>", group: idCount, fromCache: deets.fromCache, ip: deets.ip, time: time, type: deets.type, image: 'https://' + url + '/favicon.ico', shape:'image'});
+					nodes.add({id: idCount, label: "<b>" + url + "</b>", fromCache: deets.fromCache, ip: deets.ip, time: time, type: deets.type, image: 'https://' + url + '/favicon.ico', shape:'image'});
 					idToPrimary[url] = idCount;
 					idCount += 1;
-					nodes.add({id: idCount, label: "JavaScript\n<b>0</b>", group: idCount, number: 0}); // id + 1
+					nodes.add({id: idCount, label: "JavaScript\n<b>0</b>", group: 0, number: 0}); // id + 1
 					edges.add({to: idCount, from: idCount-1});
 					idCount += 1;
-					nodes.add({id: idCount, label: "Images\n<b>0</b>", group: idCount, number: 0}); // id + 2
+					nodes.add({id: idCount, label: "Images\n<b>0</b>", group: 1, number: 0}); // id + 2
 					edges.add({to: idCount, from: idCount-2});
 					idCount += 1;
-					nodes.add({id: idCount, label: "XmlHttpRequests\n<b>0</b>", group: idCount, number: 0}); // id + 3
+					nodes.add({id: idCount, label: "XmlHttpRequests\n<b>0</b>", group: 2, number: 0}); // id + 3
 					edges.add({to: idCount, from: idCount-3});
 					idCount += 1;
-					nodes.add({id: idCount, label: "Fonts\n<b>0</b>", group: idCount, number: 0}); // id + 4
+					nodes.add({id: idCount, label: "Fonts\n<b>0</b>", group: 3, number: 0}); // id + 4
 					edges.add({to: idCount, from: idCount-4});
 					idCount += 1;
-					nodes.add({id: idCount, label: "Stylesheets\n<b>0</b>", group: idCount, number:0}); // id + 5
+					nodes.add({id: idCount, label: "Stylesheets\n<b>0</b>", group:4, number:0}); // id + 5
 					edges.add({to: idCount, from: idCount-5});
 					idCount += 1;
-					nodes.add({id: idCount, label: "Media\n<b>0</b>", group: idCount, number:0}); // id + 6
+					nodes.add({id: idCount, label: "Media\n<b>0</b>", group: 5, number:0}); // id + 6
 					edges.add({to: idCount, from: idCount-6});
 					idCount += 1;
-					nodes.add({id: idCount, label: "Other\n<b>0</b>", group: idCount, number: 0}); // id + 7
+					nodes.add({id: idCount, label: "Other\n<b>0</b>", group: 6, number: 0}); // id + 7
 					edges.add({to: idCount, from: idCount-7});
 					idCount += 1;
 					network.fit(); // resize on each addition to fit growth of network
@@ -167,7 +170,7 @@ chrome.runtime.onConnect.addListener(function(port) {
 					secondaryConnections[ini] = []; // input initiator into groupDict
 					idCount += 1; // increment idCount
 					//console.log(groupDict);
-					console.log(idToPrimary);
+					//console.log(idToPrimary);
 				};
 
 			};
@@ -177,11 +180,11 @@ chrome.runtime.onConnect.addListener(function(port) {
 			var type = deets.type;
 			var ini = removehttp(deets.initiator);
 			//console.log(deets);
-			console.log(currentNumber);
+			//console.log(currentNumber);
 			if(ini in secondaryConnections) { // if primary connection this belongs to
 				if(type == "script") {
 					var currentNumber = nodes.get(idToPrimary[ini]+1).number;
-					console.log(currentNumber);
+					//console.log(currentNumber);
 					nodes.update({id: idToPrimary[ini]+1, number: currentNumber+1, label: "JavaScript\n<b>" + String(currentNumber+1) + "</b>"});
 				}
 				if(type == "image") {
