@@ -90,6 +90,9 @@ function formatFullDate(year, month, day, hour, min, sec, ms) {
   // Configuration for the Timeline
   var options = {
     zoomMin:1,
+    horizontalScroll: true,
+    orientation: 'top',
+    zoomKey: 'ctrlKey',
   };
 
   // Create a Timeline

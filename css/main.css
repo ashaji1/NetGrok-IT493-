@@ -3,10 +3,10 @@
 	margin-left:30px;
 	margin-top:30px;
 	width: 90%;
-	height: 500px;
+	height: 600px;
 	top:0px;
 	bottom:0px;
-	border: 1px solid lightgray;
+	border: 2px solid black;
 }
 
 /* Add a black background color to the top navigation */
@@ -46,4 +46,8 @@
 .topnav a.active {
   background-color: #4CAF50;
   color: white;
+}
+
+p {
+  font-size: 12px;
 }

@@ -37,7 +37,7 @@ function isPrimary(details) {
 
 
 function sizeOne (item) {
-	return item.label == url;
+	return item.title == url;
 }
 
 function removehttp(url) {
@@ -93,7 +93,7 @@ function removehttp(url) {
 
   /* Empty Network */
   if(!nodes.length) {
-  	nodes.add({id: 0, label: "Browse around to start Grokking!", image: '38.png', shape: 'image'});
+  	nodes.add({id: 0, label: "Browse around to start Grokking!", image: '38.png', shape: 'image', title: "Hi there! I'm the Scruffy Puppy!"});
   };
 
 
@@ -141,31 +141,32 @@ chrome.runtime.onConnect.addListener(function(port) {
 				//console.log(url);
 				// if request is unique
 				if(nodes.get({filter: sizeOne}).length == 0) { 
-					nodes.add({id: idCount, label: "<b>" + url + "</b>", fromCache: deets.fromCache, ip: deets.ip, time: time, type: deets.type, image: 'https://' + url + '/favicon.ico', shape:'image'});
+					nodes.add({id: idCount, title: "<b>" + url + "</b>", fromCache: deets.fromCache, ip: deets.ip, time: time, type: deets.type, image: 'https://' + url + '/favicon.ico', shape:'image'});
 					idToPrimary[url] = idCount;
 					idCount += 1;
-					nodes.add({id: idCount, label: "JavaScript\n<b>0</b>", group: 0, number: 0}); // id + 1
+					nodes.add({id: idCount, label: "JavaScript\n<b>0</b>", group: 0, number: 0, urls: []}); // id + 1
 					edges.add({to: idCount, from: idCount-1});
 					idCount += 1;
-					nodes.add({id: idCount, label: "Images\n<b>0</b>", group: 1, number: 0}); // id + 2
+					nodes.add({id: idCount, label: "Images\n<b>0</b>", group: 1, number: 0, urls: []}); // id + 2
 					edges.add({to: idCount, from: idCount-2});
 					idCount += 1;
-					nodes.add({id: idCount, label: "XmlHttpRequests\n<b>0</b>", group: 2, number: 0}); // id + 3
+					nodes.add({id: idCount, label: "XmlHttpRequests\n<b>0</b>", group: 2, number: 0, urls: []}); // id + 3
 					edges.add({to: idCount, from: idCount-3});
 					idCount += 1;
-					nodes.add({id: idCount, label: "Fonts\n<b>0</b>", group: 3, number: 0}); // id + 4
+					nodes.add({id: idCount, label: "Fonts\n<b>0</b>", group: 3, number: 0, urls: []}); // id + 4
 					edges.add({to: idCount, from: idCount-4});
 					idCount += 1;
-					nodes.add({id: idCount, label: "Stylesheets\n<b>0</b>", group:4, number:0}); // id + 5
+					nodes.add({id: idCount, label: "Stylesheets\n<b>0</b>", group:4, number:0, urls: []}); // id + 5
 					edges.add({to: idCount, from: idCount-5});
 					idCount += 1;
-					nodes.add({id: idCount, label: "Media\n<b>0</b>", group: 5, number:0}); // id + 6
+					nodes.add({id: idCount, label: "Media\n<b>0</b>", group: 5, number:0, urls: []}); // id + 6
 					edges.add({to: idCount, from: idCount-6});
 					idCount += 1;
-					nodes.add({id: idCount, label: "Other\n<b>0</b>", group: 6, number: 0}); // id + 7
+					nodes.add({id: idCount, label: "Other\n<b>0</b>", group: 6, number: 0, urls: []}); // id + 7
 					edges.add({to: idCount, from: idCount-7});
 					idCount += 1;
 					network.fit(); // resize on each addition to fit growth of network
+					//network.stabilize(); // stabilize the network immediately - add as an option later!
 					var ini = url; // store in dict
 					secondaryConnections[ini] = []; // input initiator into groupDict
 					idCount += 1; // increment idCount
@@ -185,31 +186,45 @@ chrome.runtime.onConnect.addListener(function(port) {
 				if(type == "script") {
 					var currentNumber = nodes.get(idToPrimary[ini]+1).number;
 					//console.log(currentNumber);
-					nodes.update({id: idToPrimary[ini]+1, number: currentNumber+1, label: "JavaScript\n<b>" + String(currentNumber+1) + "</b>"});
+					var newUrls = nodes.get(idToPrimary[ini]+1).urls;
+					newUrls.push(deets.url);
+					nodes.update({id: idToPrimary[ini]+1, number: currentNumber+1, label: "JavaScript\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls});
 				}
 				if(type == "image") {
 					var currentNumber = nodes.get(idToPrimary[ini]+2).number;
-					nodes.update({id: idToPrimary[ini]+2, number: currentNumber+1, label: "Images\n<b>" + String(currentNumber+1) + "</b>"});
+					var newUrls = nodes.get(idToPrimary[ini]+2).urls;
+					newUrls.push(deets.url);
+					nodes.update({id: idToPrimary[ini]+2, number: currentNumber+1, label: "Images\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls});
 				}
 				if(type == "xmlhttprequest") {
 					var currentNumber = nodes.get(idToPrimary[ini]+3).number;
-					nodes.update({id: idToPrimary[ini]+3, number: currentNumber+1, label:"XmlHttpRequests\n<b>" + String(currentNumber+1) + "</b>"});
+					var newUrls = nodes.get(idToPrimary[ini]+3).urls;
+					newUrls.push(deets.url);
+					nodes.update({id: idToPrimary[ini]+3, number: currentNumber+1, label:"XmlHttpRequests\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls});
 				}
 				if(type == "font") {
 					var currentNumber = nodes.get(idToPrimary[ini]+4).number;
-					nodes.update({id: idToPrimary[ini]+4, number: currentNumber+1, label:"Fonts\n<b>" + String(currentNumber+1) + "</b>"});
+					var newUrls = nodes.get(idToPrimary[ini]+4).urls;
+					newUrls.push(deets.url);
+					nodes.update({id: idToPrimary[ini]+4, number: currentNumber+1, label:"Fonts\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls});
 				}
 				if(type == "stylesheet") {
 					var currentNumber = nodes.get(idToPrimary[ini]+5).number;
-					nodes.update({id: idToPrimary[ini]+5, number: currentNumber+1, label: "Stylesheets\n<b>" + String(currentNumber+1) + "</b>"});
+					var newUrls = nodes.get(idToPrimary[ini]+5).urls;
+					newUrls.push(deets.url);
+					nodes.update({id: idToPrimary[ini]+5, number: currentNumber+1, label: "Stylesheets\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls});
 				}
 				if(type == "media") {
 					var currentNumber = nodes.get(idToPrimary[ini]+6).number;
-					nodes.update({id: idToPrimary[ini]+6, number: currentNumber+1, label: "Media\n<b>" + String(currentNumber+1) + "</b>"});
+					var newUrls = nodes.get(idToPrimary[ini]+6).urls;
+					newUrls.push(deets.url);
+					nodes.update({id: idToPrimary[ini]+6, number: currentNumber+1, label: "Media\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls});
 				}
 				if(type == "other") {
 					var currentNumber = nodes.get(idToPrimary[ini]+7).number;
-					nodes.update({id: idToPrimary[ini]+7, number: currentNumber+1, label: "Other\n<b>" + String(currentNumber+1) + "</b>"});
+					var newUrls = nodes.get(idToPrimary[ini]+7).urls;
+					newUrls.push(deets.url);
+					nodes.update({id: idToPrimary[ini]+7, number: currentNumber+1, label: "Other\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls});
 				}
 				secondaryConnections[ini].push(deets.url);
 			};
@@ -225,8 +240,14 @@ chrome.runtime.onConnect.addListener(function(port) {
 network.on('click', function(properties) {
 	var ids = properties.nodes;
 	var clickedNodes = nodes.get(ids);
-	var primaryConnection = clickedNodes[0].label;
-	document.getElementById('info').innerHTML = 'Secondary Connections: ' + secondaryConnections[primaryConnection];
-	document.getElementById('info').innerHTML = 'Number: ' + clickedNodes[0].number;
+	var urls = clickedNodes[0].urls;
+	//document.getElementById('info').innerHTML = 'Secondary Connections: ' + secondaryConnections[primaryConnection];
+	var table = "<p>";
+	for(var i=0; i<urls.length;i++) {
+		table += urls[i] + '\n';
+	};
+	table += "</p>";
+	console.log(table);
+	document.getElementById('info').innerHTML = table;
 	//console.log('clicked nodes: ', clickedNodes)
 });
