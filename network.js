@@ -72,6 +72,14 @@ function removehttp(url) {
   };
   
   var options = {
+  	interaction: {
+  		hover: true,
+  		hideEdgesOnDrag: true,
+  	},
+  	physics: {
+  		stabilization: true,
+  		adaptiveTimestep: true,
+  	},
   	layout: {
   		randomSeed: 2,
   	},
@@ -84,7 +92,7 @@ function removehttp(url) {
   	},
   	edges: {
   		color: {
-  			color: 'blue',
+  			color: '#D3D3D3',
   		}
   	}
   };
@@ -93,11 +101,17 @@ function removehttp(url) {
 
   /* Empty Network */
   if(!nodes.length) {
-  	nodes.add({id: 0, label: "Browse around to start Grokking!", image: '38.png', shape: 'image', title: "Hi there! I'm the Scruffy Puppy!"});
+  	nodes.add({id: 0, label: "<b>Browse around to start Grokking!</b>", image: '38.png', shape: 'image', title: "Hi there! I'm the Scruffy Puppy!"});
   };
 
 
   // ********************************************************************** //
+
+
+var changeChosenNodeSize =
+    function(values, id, selected, hovering) {
+      values.size = 30;
+    }
 
 
 /* Event Handler */
@@ -105,6 +119,7 @@ function removehttp(url) {
 var idCount = 1;
 var secondaryConnections = {}; // 
 var idToPrimary = {};
+
 
 chrome.runtime.onConnect.addListener(function(port) {
 
@@ -141,28 +156,28 @@ chrome.runtime.onConnect.addListener(function(port) {
 				//console.log(url);
 				// if request is unique
 				if(nodes.get({filter: sizeOne}).length == 0) { 
-					nodes.add({id: idCount, title: "<b>" + url + "</b>", fromCache: deets.fromCache, ip: deets.ip, time: time, type: deets.type, image: 'https://' + url + '/favicon.ico', shape:'image'});
+					nodes.add({id: idCount, title: "<b>" + url + "</b>", fromCache: deets.fromCache, ip: deets.ip, time: time, type: deets.type, image: 'https://' + url + '/favicon.ico', shape:'image', url: 'https://' + url});
 					idToPrimary[url] = idCount;
 					idCount += 1;
-					nodes.add({id: idCount, label: "JavaScript\n<b>0</b>", group: 0, number: 0, urls: []}); // id + 1
+					nodes.add({id: idCount, label: "JavaScript\n<b>0</b>", group: 0, number: 0, title: "All externally linked JavaScript files loaded by web browsers to display dynamic, interactive web pages", urls: [], url: url, hidden: true}); // id + 1
 					edges.add({to: idCount, from: idCount-1});
 					idCount += 1;
-					nodes.add({id: idCount, label: "Images\n<b>0</b>", group: 1, number: 0, urls: []}); // id + 2
+					nodes.add({id: idCount, label: "Images\n<b>0</b>", group: 1, number: 0, title: "All loaded images (.jpg, .png, .gif)", urls: [], url: url, hidden: true}); // id + 2
 					edges.add({to: idCount, from: idCount-2});
 					idCount += 1;
-					nodes.add({id: idCount, label: "XmlHttpRequests\n<b>0</b>", group: 2, number: 0, urls: []}); // id + 3
+					nodes.add({id: idCount, label: "XmlHttpRequests\n<b>0</b>", group: 2, number: 0, title: "XHR objects that interact with servers to retrieve data without a full page refresh", urls: [], url: url, hidden: true}); // id + 3
 					edges.add({to: idCount, from: idCount-3});
 					idCount += 1;
-					nodes.add({id: idCount, label: "Fonts\n<b>0</b>", group: 3, number: 0, urls: []}); // id + 4
+					nodes.add({id: idCount, label: "Fonts\n<b>0</b>", group: 3, number: 0, title: "Specialized, external fonts loaded by websites", urls: [], url: url, hidden: true}); // id + 4
 					edges.add({to: idCount, from: idCount-4});
 					idCount += 1;
-					nodes.add({id: idCount, label: "Stylesheets\n<b>0</b>", group:4, number:0, urls: []}); // id + 5
+					nodes.add({id: idCount, label: "Stylesheets\n<b>0</b>", group:4, number: 0, title: "CSS stylesheets that provide color, layout, and fonts", urls: [], url: url, hidden: true}); // id + 5
 					edges.add({to: idCount, from: idCount-5});
 					idCount += 1;
-					nodes.add({id: idCount, label: "Media\n<b>0</b>", group: 5, number:0, urls: []}); // id + 6
+					nodes.add({id: idCount, label: "Media\n<b>0</b>", group: 5, number: 0, title: "External video and audio linked by webpages", urls: [], url: url, hidden: true}); // id + 6
 					edges.add({to: idCount, from: idCount-6});
 					idCount += 1;
-					nodes.add({id: idCount, label: "Other\n<b>0</b>", group: 6, number: 0, urls: []}); // id + 7
+					nodes.add({id: idCount, label: "Other\n<b>0</b>", group: 6, number: 0, title:"Other requests, such as database fetches", urls: [], url: url, hidden: true}); // id + 7
 					edges.add({to: idCount, from: idCount-7});
 					idCount += 1;
 					network.fit(); // resize on each addition to fit growth of network
@@ -188,43 +203,43 @@ chrome.runtime.onConnect.addListener(function(port) {
 					//console.log(currentNumber);
 					var newUrls = nodes.get(idToPrimary[ini]+1).urls;
 					newUrls.push(deets.url);
-					nodes.update({id: idToPrimary[ini]+1, number: currentNumber+1, label: "JavaScript\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls});
+					nodes.update({id: idToPrimary[ini]+1, number: currentNumber+1, label: "JavaScript\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls, ini: ini});
 				}
 				if(type == "image") {
 					var currentNumber = nodes.get(idToPrimary[ini]+2).number;
 					var newUrls = nodes.get(idToPrimary[ini]+2).urls;
 					newUrls.push(deets.url);
-					nodes.update({id: idToPrimary[ini]+2, number: currentNumber+1, label: "Images\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls});
+					nodes.update({id: idToPrimary[ini]+2, number: currentNumber+1, label: "Images\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls, ini: ini});
 				}
 				if(type == "xmlhttprequest") {
 					var currentNumber = nodes.get(idToPrimary[ini]+3).number;
 					var newUrls = nodes.get(idToPrimary[ini]+3).urls;
 					newUrls.push(deets.url);
-					nodes.update({id: idToPrimary[ini]+3, number: currentNumber+1, label:"XmlHttpRequests\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls});
+					nodes.update({id: idToPrimary[ini]+3, number: currentNumber+1, label:"XmlHttpRequests\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls, ini: ini});
 				}
 				if(type == "font") {
 					var currentNumber = nodes.get(idToPrimary[ini]+4).number;
 					var newUrls = nodes.get(idToPrimary[ini]+4).urls;
 					newUrls.push(deets.url);
-					nodes.update({id: idToPrimary[ini]+4, number: currentNumber+1, label:"Fonts\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls});
+					nodes.update({id: idToPrimary[ini]+4, number: currentNumber+1, label:"Fonts\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls, ini: ini});
 				}
 				if(type == "stylesheet") {
 					var currentNumber = nodes.get(idToPrimary[ini]+5).number;
 					var newUrls = nodes.get(idToPrimary[ini]+5).urls;
 					newUrls.push(deets.url);
-					nodes.update({id: idToPrimary[ini]+5, number: currentNumber+1, label: "Stylesheets\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls});
+					nodes.update({id: idToPrimary[ini]+5, number: currentNumber+1, label: "Stylesheets\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls, ini: ini});
 				}
 				if(type == "media") {
 					var currentNumber = nodes.get(idToPrimary[ini]+6).number;
 					var newUrls = nodes.get(idToPrimary[ini]+6).urls;
 					newUrls.push(deets.url);
-					nodes.update({id: idToPrimary[ini]+6, number: currentNumber+1, label: "Media\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls});
+					nodes.update({id: idToPrimary[ini]+6, number: currentNumber+1, label: "Media\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls, ini: ini});
 				}
 				if(type == "other") {
 					var currentNumber = nodes.get(idToPrimary[ini]+7).number;
 					var newUrls = nodes.get(idToPrimary[ini]+7).urls;
 					newUrls.push(deets.url);
-					nodes.update({id: idToPrimary[ini]+7, number: currentNumber+1, label: "Other\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls});
+					nodes.update({id: idToPrimary[ini]+7, number: currentNumber+1, label: "Other\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls, ini: ini});
 				}
 				secondaryConnections[ini].push(deets.url);
 			};
@@ -237,17 +252,84 @@ chrome.runtime.onConnect.addListener(function(port) {
 
 
 /* Interactive Events */
-network.on('click', function(properties) {
+/*network.on('click', function(properties) {
 	var ids = properties.nodes;
 	var clickedNodes = nodes.get(ids);
-	var urls = clickedNodes[0].urls;
-	//document.getElementById('info').innerHTML = 'Secondary Connections: ' + secondaryConnections[primaryConnection];
-	var table = "<p>";
-	for(var i=0; i<urls.length;i++) {
-		table += urls[i] + '\n';
-	};
-	table += "</p>";
-	console.log(table);
-	document.getElementById('info').innerHTML = table;
-	//console.log('clicked nodes: ', clickedNodes)
+	console.log(clickedNodes[0].id);
+	if(clickedNodes[0].urls) { // if secondary connection
+		var urls = clickedNodes[0].urls;
+		//document.getElementById('info').innerHTML = 'Secondary Connections: ' + secondaryConnections[primaryConnection];
+		var table = "";
+		for(var i=0; i<urls.length;i++) {
+			table += '<p><a href="' + urls[i] +'" target="_blank">' + urls[i] + '</a></p>';
+		};
+		console.log(table);
+		document.getElementById('info').innerHTML = table;
+		//console.log('clicked nodes: ', clickedNodes)
+	}
+	//else {
+	//	var urlToOpen = clickedNodes[0].url; // url of primary connection
+	//	window.open(urlToOpen);
+	//	console.log(urlToOpen);
+	//}
+});*/
+
+network.on("click", function(properties) {
+	var ids = properties.nodes;
+	var hoveredNodes = nodes.get(ids);
+	var ini = removehttp(hoveredNodes[0].url);
+	var jsNode = nodes.get(idToPrimary[ini]+1);
+	var xmlNode = nodes.get(idToPrimary[ini]+2);
+	var styleNode = nodes.get(idToPrimary[ini]+3)
+	var fontNode = nodes.get(idToPrimary[ini]+4);
+	var imageNode = nodes.get(idToPrimary[ini]+5);
+	var mediaNode = nodes.get(idToPrimary[ini]+6);
+	var otherNode = nodes.get(idToPrimary[ini]+7);
+	//console.log(nodesToHide);
+	jsNode.hidden = false;
+	xmlNode.hidden = false;
+	imageNode.hidden = false;
+	fontNode.hidden = false;
+	styleNode.hidden = false;
+	mediaNode.hidden = false;
+	otherNode.hidden = false;
+	nodes.update(jsNode);
+	nodes.update(xmlNode);
+	nodes.update(imageNode);
+	nodes.update(fontNode);
+	nodes.update(styleNode);
+	nodes.update(mediaNode);
+	nodes.update(otherNode);
 });
+
+network.on("oncontext", function(properties) {
+	var ids = properties.nodes;
+	var hoveredNodes = nodes.get(ids);
+	var ini = removehttp(hoveredNodes[0].url);
+	var jsNode = nodes.get(idToPrimary[ini]+1);
+	var xmlNode = nodes.get(idToPrimary[ini]+2);
+	var styleNode = nodes.get(idToPrimary[ini]+3)
+	var fontNode = nodes.get(idToPrimary[ini]+4);
+	var imageNode = nodes.get(idToPrimary[ini]+5);
+	var mediaNode = nodes.get(idToPrimary[ini]+6);
+	var otherNode = nodes.get(idToPrimary[ini]+7);
+	//console.log(nodesToHide);
+	jsNode.hidden = true;
+	xmlNode.hidden = true;
+	imageNode.hidden = true;
+	fontNode.hidden = true;
+	styleNode.hidden = true;
+	mediaNode.hidden = true;
+	otherNode.hidden = true;
+	nodes.update(jsNode);
+	nodes.update(xmlNode);
+	nodes.update(imageNode);
+	nodes.update(fontNode);
+	nodes.update(styleNode);
+	nodes.update(mediaNode);
+	nodes.update(otherNode);
+});
+
+document.oncontextmenu = function() {
+    return false;
+}
