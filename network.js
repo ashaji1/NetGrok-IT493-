@@ -37,7 +37,7 @@ function isPrimary(details) {
 
 
 function sizeOne (item) {
-	return item.title == url;
+	return item.title == item.url;
 }
 
 function removehttp(url) {
@@ -108,12 +108,6 @@ function removehttp(url) {
   // ********************************************************************** //
 
 
-var changeChosenNodeSize =
-    function(values, id, selected, hovering) {
-      values.size = 30;
-    }
-
-
 /* Event Handler */
 
 var idCount = 1;
@@ -155,7 +149,8 @@ chrome.runtime.onConnect.addListener(function(port) {
 				var time = new Date(Message.Details.timeStamp).toTimeString().slice(0, 8);
 				//console.log(url);
 				// if request is unique
-				if(nodes.get({filter: sizeOne}).length == 0) { 
+				console.log(nodes._data);
+				if(!(JSON.stringify(nodes._data)).includes(url)) {
 					nodes.add({id: idCount, title: "<b>" + url + "</b>", fromCache: deets.fromCache, ip: deets.ip, time: time, type: deets.type, image: 'https://' + url + '/favicon.ico', shape:'image', url: 'https://' + url});
 					idToPrimary[url] = idCount;
 					idCount += 1;
@@ -274,13 +269,13 @@ chrome.runtime.onConnect.addListener(function(port) {
 	//}
 });*/
 
-network.on("click", function(properties) {
-	var ids = properties.nodes;
-	var hoveredNodes = nodes.get(ids);
-	var ini = removehttp(hoveredNodes[0].url);
+network.on("hoverNode", function(properties) {
+	var hoveredNodes = nodes.get(properties.node);
+	console.log(hoveredNodes);
+	var ini = removehttp(hoveredNodes.url);
 	var jsNode = nodes.get(idToPrimary[ini]+1);
 	var xmlNode = nodes.get(idToPrimary[ini]+2);
-	var styleNode = nodes.get(idToPrimary[ini]+3)
+	var styleNode = nodes.get(idToPrimary[ini]+3);
 	var fontNode = nodes.get(idToPrimary[ini]+4);
 	var imageNode = nodes.get(idToPrimary[ini]+5);
 	var mediaNode = nodes.get(idToPrimary[ini]+6);
@@ -302,13 +297,12 @@ network.on("click", function(properties) {
 	nodes.update(otherNode);
 });
 
-network.on("oncontext", function(properties) {
-	var ids = properties.nodes;
-	var hoveredNodes = nodes.get(ids);
-	var ini = removehttp(hoveredNodes[0].url);
+network.on("blurNode", function(properties) {
+	var hoveredNodes = nodes.get(properties.node);
+	var ini = removehttp(hoveredNodes.url);
 	var jsNode = nodes.get(idToPrimary[ini]+1);
 	var xmlNode = nodes.get(idToPrimary[ini]+2);
-	var styleNode = nodes.get(idToPrimary[ini]+3)
+	var styleNode = nodes.get(idToPrimary[ini]+3);
 	var fontNode = nodes.get(idToPrimary[ini]+4);
 	var imageNode = nodes.get(idToPrimary[ini]+5);
 	var mediaNode = nodes.get(idToPrimary[ini]+6);
@@ -329,6 +323,7 @@ network.on("oncontext", function(properties) {
 	nodes.update(mediaNode);
 	nodes.update(otherNode);
 });
+
 
 document.oncontextmenu = function() {
     return false;
