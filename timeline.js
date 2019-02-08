@@ -59,10 +59,10 @@ function formatFullDate(year, month, day, hour, min, sec, ms) {
   var newDay = day;
   var newSec = sec;
   var newMin = min;
-  if(newMonth.length < 2) newMonth = '0' + newMonth;
-  if(newDay.length < 2) newDay = '0' + newDay;
-  if(newSec.length < 2) newSec = '0' + newSec; 
-  if(newMin.length < 2) newMin ='0' + newMin;
+  if(newMonth.length < 2) newMonth = '0' + String(newMonth);
+  if(newDay.length < 2) newDay = '0' + String(newDay);
+  if(newSec.length < 2) newSec = '0' + String(newSec); 
+  if(newMin.length < 2) newMin ='0' + String(newMin);
   formatted += year + '-' + newMonth + '-' + newDay + 'T' + hour + ':' + newMin + ':' + newSec + '.' + ms;
   return formatted;
 }
@@ -75,6 +75,7 @@ function formatFullDate(year, month, day, hour, min, sec, ms) {
   var date = new Date();
   var year = String(date.getFullYear());
   var month = String(date.getMonth());
+  console.log('month' + month);
   var day = String(date.getDate());
   var hour = String(date.getHours());
   var min = String(date.getMinutes());
@@ -85,6 +86,7 @@ function formatFullDate(year, month, day, hour, min, sec, ms) {
   var items = new vis.DataSet([
     {id: 1, content: 'Session start', start: formatFullDate(year, month, day, hour, min, sec, mil)},
   ]);
+  console.log('hell0');
   console.log(formatFullDate(year, month, day, hour, min, sec, mil));
 
   // Configuration for the Timeline

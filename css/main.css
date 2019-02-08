@@ -3,7 +3,7 @@
 	margin-left:30px;
 	margin-top:30px;
 	width: 90%;
-	height: 600px;
+	height: 500px;
 	top:0px;
 	bottom:0px;
 	border: 2px solid black;
@@ -11,6 +11,7 @@
 
 p {
   font-size: 30px;
+  font-weight: bold;
 }
 
 /* Place the navbar at the bottom of the page, and make it stick */
@@ -21,6 +22,7 @@ p {
   position: fixed;
   bottom: 0;
   width: 100%;
+  display:block;
 }
 
 /* Style the links inside the navigation bar */
@@ -45,4 +47,28 @@ p {
 .navbar a.active {
   background-color: #1569C7;
   color: white;
+}
+
+.button {
+  display: inline-block;
+  background: hsl(40, 100%, 60%);
+  color: hsl(40, 100%, 20%);
+  text-decoration: none;
+  padding: 5px 10px;
+}
+
+[data-notifications] {
+  position: relative;
+}
+
+[data-notifications]:after {
+  content: attr(data-notifications);
+  position: absolute;
+  background: red;
+  border-radius: 50%;
+  display: inline-block;
+  padding: 0.3em;
+  color: #f2f2f2;
+  right: -15px;
+  top: -15px;
 }

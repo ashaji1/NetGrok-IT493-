@@ -84,6 +84,10 @@ function removehttp(url) {
   		randomSeed: 2,
   	},
   	nodes: {
+  		scaling: {
+  			min: 10,
+  			max: 100,
+  		},
   		brokenImage: "undefined.png",
   		font: {
   			multi: 'html',
@@ -93,7 +97,9 @@ function removehttp(url) {
   	edges: {
   		color: {
   			color: '#D3D3D3',
-  		}
+  		},
+  		width: 0.5,
+  		length: 5,
   	}
   };
   var network = new vis.Network(container, data, options);
@@ -101,7 +107,7 @@ function removehttp(url) {
 
   /* Empty Network */
   if(!nodes.length) {
-  	nodes.add({id: 0, label: "<b>Browse around to start Grokking!</b>", image: '38.png', shape: 'image', title: "Hi there! I'm the Scruffy Puppy!"});
+  	nodes.add({id: 0, label: "<b>Browse around to start Grokking!</b>", image: '128.png', size: 60, shape: 'image', title: "Hi there! I'm the Scruffy Puppy!"});
   };
 
 
@@ -151,7 +157,7 @@ chrome.runtime.onConnect.addListener(function(port) {
 				// if request is unique
 				console.log(nodes._data);
 				if(!(JSON.stringify(nodes._data)).includes(url)) {
-					nodes.add({id: idCount, title: "<b>" + url + "</b>", fromCache: deets.fromCache, ip: deets.ip, time: time, type: deets.type, image: 'https://' + url + '/favicon.ico', shape:'image', url: 'https://' + url});
+					nodes.add({id: idCount, value: 0, title: "<b>" + url + "</b>", fromCache: deets.fromCache, ip: deets.ip, time: time, type: deets.type, image: 'https://' + url + '/favicon.ico', shape:'image', url: 'https://' + url});
 					idToPrimary[url] = idCount;
 					idCount += 1;
 					nodes.add({id: idCount, label: "JavaScript\n<b>0</b>", group: 0, number: 0, title: "All externally linked JavaScript files loaded by web browsers to display dynamic, interactive web pages", urls: [], url: url, hidden: true}); // id + 1
@@ -199,42 +205,49 @@ chrome.runtime.onConnect.addListener(function(port) {
 					var newUrls = nodes.get(idToPrimary[ini]+1).urls;
 					newUrls.push(deets.url);
 					nodes.update({id: idToPrimary[ini]+1, number: currentNumber+1, label: "JavaScript\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls, ini: ini});
+					nodes.update({id: idToPrimary[ini], value: currentNumber+1});
 				}
 				if(type == "image") {
 					var currentNumber = nodes.get(idToPrimary[ini]+2).number;
 					var newUrls = nodes.get(idToPrimary[ini]+2).urls;
 					newUrls.push(deets.url);
 					nodes.update({id: idToPrimary[ini]+2, number: currentNumber+1, label: "Images\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls, ini: ini});
+					nodes.update({id: idToPrimary[ini], value: currentNumber+1});
 				}
 				if(type == "xmlhttprequest") {
 					var currentNumber = nodes.get(idToPrimary[ini]+3).number;
 					var newUrls = nodes.get(idToPrimary[ini]+3).urls;
 					newUrls.push(deets.url);
 					nodes.update({id: idToPrimary[ini]+3, number: currentNumber+1, label:"XmlHttpRequests\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls, ini: ini});
+					nodes.update({id: idToPrimary[ini], value: currentNumber+1});
 				}
 				if(type == "font") {
 					var currentNumber = nodes.get(idToPrimary[ini]+4).number;
 					var newUrls = nodes.get(idToPrimary[ini]+4).urls;
 					newUrls.push(deets.url);
 					nodes.update({id: idToPrimary[ini]+4, number: currentNumber+1, label:"Fonts\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls, ini: ini});
+					nodes.update({id: idToPrimary[ini], value: currentNumber+1});
 				}
 				if(type == "stylesheet") {
 					var currentNumber = nodes.get(idToPrimary[ini]+5).number;
 					var newUrls = nodes.get(idToPrimary[ini]+5).urls;
 					newUrls.push(deets.url);
 					nodes.update({id: idToPrimary[ini]+5, number: currentNumber+1, label: "Stylesheets\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls, ini: ini});
+					nodes.update({id: idToPrimary[ini], value: currentNumber+1});
 				}
 				if(type == "media") {
 					var currentNumber = nodes.get(idToPrimary[ini]+6).number;
 					var newUrls = nodes.get(idToPrimary[ini]+6).urls;
 					newUrls.push(deets.url);
 					nodes.update({id: idToPrimary[ini]+6, number: currentNumber+1, label: "Media\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls, ini: ini});
+					nodes.update({id: idToPrimary[ini], value: currentNumber+1});
 				}
 				if(type == "other") {
 					var currentNumber = nodes.get(idToPrimary[ini]+7).number;
 					var newUrls = nodes.get(idToPrimary[ini]+7).urls;
 					newUrls.push(deets.url);
 					nodes.update({id: idToPrimary[ini]+7, number: currentNumber+1, label: "Other\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls, ini: ini});
+					nodes.update({id: idToPrimary[ini], value: currentNumber+1});
 				}
 				secondaryConnections[ini].push(deets.url);
 			};
