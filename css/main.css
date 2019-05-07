@@ -1,10 +1,10 @@
 #mynetwork {
 	position:relative;
 	margin-left:30px;
-	margin-top:30px;
+	margin-top:0px;
 	width: 90%;
 	height: 500px;
-	top:0px;
+	top:20px;
 	bottom:0px;
 	border: 2px solid black;
 }
@@ -14,15 +14,20 @@ p {
   font-weight: bold;
 }
 
+body {
+  padding-top: 100px;
+  padding-bottom: 50px;
+}
+
 /* Place the navbar at the bottom of the page, and make it stick */
 .navbar {
   text-align:center;
   background-color: white;
   overflow: hidden;
   position: fixed;
-  bottom: 0;
   width: 100%;
   display:block;
+  z-index: 1000000;
 }
 
 /* Style the links inside the navigation bar */
@@ -47,6 +52,10 @@ p {
 .navbar a.active {
   background-color: #1569C7;
   color: white;
+}
+
+.navbar-offset {
+  top: 7px;
 }
 
 .button {

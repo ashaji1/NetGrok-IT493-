@@ -15,6 +15,6 @@
 		},
 		"default_title": "Start Grokking!"
 	},
-	"permissions": ["storage", "tabs", "webRequest", "webRequestBlocking", "*://*/*"],
+	"permissions": ["activeTab","http://iscd.netgrok.org", "storage", "tabs", "webRequest", "webRequestBlocking", "*://*/*"],
 	"manifest_version": 2
 }

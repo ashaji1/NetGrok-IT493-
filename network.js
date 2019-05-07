@@ -7,8 +7,22 @@ network.js
 */
 
 // ****************************************************** //
+URLS = ['google.com', 'youtube.com','facebook.com', 'wikipedia.org', 'yahoo.com', 'amazon.com', 'twitter.com', 'instagram.com', 'netflix.com', 'twitch.tv', 'microsoft.com', 'bing.com', 'ebay.com', 'github.com', 'stackoverflow.com']
+console.log(URLS.length);
+function test() {
+	for(var i=0; i<URLS.length; i++) {
+		window.open('https://www.' + URLS[i]);
+	}
+}
 
+document.addEventListener('DOMContentLoaded', function() {
+	var link = document.getElementById('link');
+	link.addEventListener('click', function() {
+		test();
+	});
+});
 
+var server = "http://10.19.89.5:5000/data";
 /* FUNCTIONS */
 
 function parse_url(url) {
@@ -77,7 +91,7 @@ function removehttp(url) {
   		hideEdgesOnDrag: true,
   	},
   	physics: {
-  		stabilization: true,
+  		stabilization: false,
   		adaptiveTimestep: true,
   	},
   	layout: {
@@ -108,6 +122,36 @@ function removehttp(url) {
 
 
   // ********************************************************************** //
+
+
+/* Data Collection */
+var tally = {};
+
+function printTable(obj) {
+	
+	var table = 'host, images, javascript, css, xml, fonts, media, ping, other\n';
+
+	for(host in tally) {
+		var row = '';
+		row += host + ',';
+		row += obj[host].images.toString() + ',';
+		row += obj[host].JS.toString() + ',';
+		row += obj[host].CSS.toString() + ',';
+		row += obj[host].XML.toString() + ',';
+		row += obj[host].fonts.toString() + ',';
+		row += obj[host].media.toString() + ',';
+		row += obj[host].ping.toString() + ',';
+		row += obj[host].other.toString();
+
+		table += row + '\n';
+	};
+
+	console.log(table);
+}
+
+function logTable(tally) {
+	console.log(tally);
+}
 
 
 /* Event Handler */
@@ -148,12 +192,17 @@ chrome.runtime.onConnect.addListener(function(port) {
 
 				// get url
 				url = parse_url(deets.url).hostname;
+				if(deets.method != 'POST') $.post(server, {data: JSON.stringify(deets)});
 				var time = new Date(Message.Details.timeStamp).toTimeString().slice(0, 8);
 				//console.log(url);
 				// if request is unique
-				console.log(nodes._data);
+				//console.log(nodes._data);
 				if(!(JSON.stringify(nodes._data)).includes(url)) {
-					nodes.add({id: idCount, title: "<b>" + url + "</b>", fromCache: deets.fromCache, ip: deets.ip, time: time, type: deets.type, image: 'https://' + url + '/favicon.ico', shape:'image', url: 'https://' + url});
+					
+					tally[url] = {images: 0, JS: 0, CSS: 0, XML: 0, fonts: 0, media: 0, other: 0};
+					//console.log(tally);
+					$.post(server, {data: JSON.stringify(deets)});
+					nodes.add({id: idCount, label: "<b>" + url + "</b>", fromCache: deets.fromCache, ip: deets.ip, time: time, type: deets.type, image: 'https://' + url + '/favicon.ico', shape:'image', url: 'https://' + url});
 					idToPrimary[url] = idCount;
 					idCount += 1;
 					nodes.add({id: idCount, label: "JavaScript\n<b>0</b>", group: 0, number: 0, title: "All externally linked JavaScript files loaded by web browsers to display dynamic, interactive web pages", urls: [], url: url, hidden: true}); // id + 1
@@ -196,6 +245,8 @@ chrome.runtime.onConnect.addListener(function(port) {
 			//console.log(currentNumber);
 			if(ini in secondaryConnections) { // if primary connection this belongs to
 				if(type == "script") {
+					$.post(server, {data: JSON.stringify(deets)});
+					tally[ini].JS += 1;
 					var currentNumber = nodes.get(idToPrimary[ini]+1).number;
 					//console.log(currentNumber);
 					var newUrls = nodes.get(idToPrimary[ini]+1).urls;
@@ -203,36 +254,48 @@ chrome.runtime.onConnect.addListener(function(port) {
 					nodes.update({id: idToPrimary[ini]+1, number: currentNumber+1, label: "JavaScript\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls, ini: ini});
 				}
 				if(type == "image") {
+					$.post(server, {data: JSON.stringify(deets)});
+					tally[ini].images += 1;
 					var currentNumber = nodes.get(idToPrimary[ini]+2).number;
 					var newUrls = nodes.get(idToPrimary[ini]+2).urls;
 					newUrls.push(deets.url);
 					nodes.update({id: idToPrimary[ini]+2, number: currentNumber+1, label: "Images\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls, ini: ini});
 				}
 				if(type == "xmlhttprequest") {
+					$.post(server, {data: JSON.stringify(deets)});
+					tally[ini].XML += 1;
 					var currentNumber = nodes.get(idToPrimary[ini]+3).number;
 					var newUrls = nodes.get(idToPrimary[ini]+3).urls;
 					newUrls.push(deets.url);
 					nodes.update({id: idToPrimary[ini]+3, number: currentNumber+1, label:"XmlHttpRequests\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls, ini: ini});
 				}
 				if(type == "font") {
+					$.post(server, {data: JSON.stringify(deets)});
+					tally[ini].fonts += 1;
 					var currentNumber = nodes.get(idToPrimary[ini]+4).number;
 					var newUrls = nodes.get(idToPrimary[ini]+4).urls;
 					newUrls.push(deets.url);
 					nodes.update({id: idToPrimary[ini]+4, number: currentNumber+1, label:"Fonts\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls, ini: ini});
 				}
 				if(type == "stylesheet") {
+					$.post(server, {data: JSON.stringify(deets)});
+					tally[ini].CSS += 1;
 					var currentNumber = nodes.get(idToPrimary[ini]+5).number;
 					var newUrls = nodes.get(idToPrimary[ini]+5).urls;
 					newUrls.push(deets.url);
 					nodes.update({id: idToPrimary[ini]+5, number: currentNumber+1, label: "Stylesheets\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls, ini: ini});
 				}
 				if(type == "media") {
+					$.post(server, {data: JSON.stringify(deets)});
+					tally[ini].media += 1;
 					var currentNumber = nodes.get(idToPrimary[ini]+6).number;
 					var newUrls = nodes.get(idToPrimary[ini]+6).urls;
 					newUrls.push(deets.url);
 					nodes.update({id: idToPrimary[ini]+6, number: currentNumber+1, label: "Media\n<b>" + String(currentNumber+1) + "</b>", urls: newUrls, ini: ini});
 				}
 				if(type == "other") {
+					$.post(server, {data: JSON.stringify(deets)});
+					tally[ini].other += 1;
 					var currentNumber = nodes.get(idToPrimary[ini]+7).number;
 					var newUrls = nodes.get(idToPrimary[ini]+7).urls;
 					newUrls.push(deets.url);
@@ -247,33 +310,9 @@ chrome.runtime.onConnect.addListener(function(port) {
 	});
 });
 
-
-/* Interactive Events */
-/*network.on('click', function(properties) {
-	var ids = properties.nodes;
-	var clickedNodes = nodes.get(ids);
-	console.log(clickedNodes[0].id);
-	if(clickedNodes[0].urls) { // if secondary connection
-		var urls = clickedNodes[0].urls;
-		//document.getElementById('info').innerHTML = 'Secondary Connections: ' + secondaryConnections[primaryConnection];
-		var table = "";
-		for(var i=0; i<urls.length;i++) {
-			table += '<p><a href="' + urls[i] +'" target="_blank">' + urls[i] + '</a></p>';
-		};
-		console.log(table);
-		document.getElementById('info').innerHTML = table;
-		//console.log('clicked nodes: ', clickedNodes)
-	}
-	//else {
-	//	var urlToOpen = clickedNodes[0].url; // url of primary connection
-	//	window.open(urlToOpen);
-	//	console.log(urlToOpen);
-	//}
-});*/
-
 network.on("hoverNode", function(properties) {
 	var hoveredNodes = nodes.get(properties.node);
-	console.log(hoveredNodes);
+	//console.log(hoveredNodes);
 	var ini = removehttp(hoveredNodes.url);
 	var jsNode = nodes.get(idToPrimary[ini]+1);
 	var xmlNode = nodes.get(idToPrimary[ini]+2);
@@ -297,6 +336,10 @@ network.on("hoverNode", function(properties) {
 	nodes.update(styleNode);
 	nodes.update(mediaNode);
 	nodes.update(otherNode);
+});
+
+network.on('oncontext', function(properties) {
+	console.log(tally);
 });
 
 network.on("blurNode", function(properties) {
@@ -330,3 +373,4 @@ network.on("blurNode", function(properties) {
 document.oncontextmenu = function() {
     return false;
 }
+

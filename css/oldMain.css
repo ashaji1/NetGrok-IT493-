@@ -6,6 +6,7 @@
 html, body {
 	width: 100%;
 	font-size: 15px;
+	overflow-y:scroll;
 }
 
 table {
@@ -125,6 +126,7 @@ table {
 
 .requests {
 	display: table;
+
 }
 
 .filter {
@@ -133,12 +135,13 @@ table {
 }
 
 .filter.fixed {
+	margin-top:100px;
 	background: rgba(0, 0, 0, 0.8);
 	position: fixed;
 	top: 0;
 	left: 0;
 	right: -1000px;
-	z-index: 10000;
+	z-index: 100000000;
 }
 
 .filter > div {
